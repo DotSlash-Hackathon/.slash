@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:suraksha/unsafeareas.dart';
 import 'package:suraksha/updateDetails.dart';
 import 'cnfusr.dart';
 import 'package:gps/gps.dart';
@@ -13,11 +14,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hardware_buttons/hardware_buttons.dart' as HardwareButtons;
 import 'main.dart';
 import 'package:toast/toast.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 final db=Firestore.instance;
-
 String name;
-
+double dist,lat,long;
+List<Placemark> placemark;
 // ignore: camel_case_types
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -28,9 +29,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   GpsLatlng latlng;
-  List<Placemark> placemark;
-  String address;
-  String temp1="",temp2="",ec1,ec2;
+
+  String address, link;
+  String temp1="",temp2="",ec1,ec2,l1,l2;
+
   StreamSubscription<HardwareButtons.VolumeButtonEvent> _lockButtonSubscription;
 
   @override
@@ -46,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _lockButtonSubscription = HardwareButtons.volumeButtonEvents.listen((event) {
       test=event.toString();
       if(test=="VolumeButtonEvent.VOLUME_UP")
-        initGps();
+        sos();
     });
 
   }
@@ -57,11 +59,11 @@ class _MyHomePageState extends State<MyHomePage> {
     if(enabled==false)
       enabled = await location.requestService();
     if(enabled==true) {
-      final gps = await Gps.currentGps();
+      final  gps = await Gps.currentGps();
       latlng = gps;
       String temp = latlng.toString();
-      double lat = 0.0,
-          long = 0.0;
+      lat = 0.0;
+      long = 0.0;
       int i = 0;
       temp1 = "";
       temp2 = "";
@@ -79,25 +81,47 @@ class _MyHomePageState extends State<MyHomePage> {
       lat = double.parse(temp1);
       long = double.parse(temp2);
       placemark = await Geolocator().placemarkFromCoordinates(lat, long);
-      address = placemark[0].name + ", " + placemark[0].subLocality + ", " +
+      address = "I am in emergency!\nThis is my current location: "+placemark[0].name + ", " + placemark[0].subLocality + ", " +
           placemark[0].locality + ", " + placemark[0].administrativeArea +
-          ", " + placemark[0].country + " - " + placemark[0].postalCode;
-      sms();
+          ", " + placemark[0].country + " - " + placemark[0].postalCode+"\nCoordinates: "+temp1+","+temp2;
+      link="Google Map Link: http://maps.google.com/maps?z=18&q="+temp1+","+temp2;
     }
     else
       initGps();
   }
+  void sos() async {
+    initGps();
+    sms();
+    Map<String,dynamic> data = <String,dynamic>{
+        "Latitude": temp1,
+        "Longitude": temp2,
+      };
+      await db.collection("Unsafe").add(data).whenComplete(() {
+        print("Location Added");
+      }).catchError((e) => print(e));
+      //Toast.show("Location Submitted Successfuly", context, duration: Toast.LENGTH_LONG,gravity: Toast.BOTTOM);
+  }
   sms(){
     SmsSender sender = new SmsSender();
     String add = '+919913971152';
-    SmsMessage message = new SmsMessage(add, 'I am in emergency!\nThis is my current location: '+address+'\nCoordinates(Latitude,Longitude):\n('+temp1+', '+temp2+')');
+    SmsMessage message = new SmsMessage(add, address);
     message.onStateChanged.listen((state) {
       if (state == SmsMessageState.Sent) {
         print("SMS is sent!");
-      } else if (state == SmsMessageState.Delivered) {
+      }
+      else if (state == SmsMessageState.Delivered) {
         print("SMS is delivered!");
-      } else
-        print(state);
+      }
+    });
+    sender.sendSms(message);
+    SmsMessage message1 = new SmsMessage(add, link);
+    message1.onStateChanged.listen((state) {
+      if (state == SmsMessageState.Sent) {
+        print("SMS is sent!");
+      }
+      else if (state == SmsMessageState.Delivered) {
+        print("SMS is delivered!");
+      }
     });
     DocumentReference documentReference = db.collection("Users").document(s);
     documentReference.get().then((datasnapshot) {
@@ -105,12 +129,18 @@ class _MyHomePageState extends State<MyHomePage> {
          ec1 = datasnapshot.data['Emergency Contact 1'].toString();
          ec2 = datasnapshot.data['Emergency Contact 2'].toString();
       }
+      print("ec1="+ec1);
+      print("ec2="+ec2);
     });
+    sender.sendSms(message1);
+    message = new SmsMessage(ec1, address);
     sender.sendSms(message);
-    /*message = new SmsMessage(ec1, 'I am in emergency!\nThis is my current location: '+address+'\nCoordinates(Latitude,Longitude):\n('+temp1+', '+temp2+')');
+    message1 = new SmsMessage(ec1, link);
+    sender.sendSms(message1);
+    message = new SmsMessage(ec2, address);
     sender.sendSms(message);
-    message = new SmsMessage(ec2, 'I am in emergency!\nThis is my current location: '+address+'\nCoordinates(Latitude,Longitude):\n('+temp1+', '+temp2+')');
-    sender.sendSms(message);*/
+    message1 = new SmsMessage(ec2, link);
+    sender.sendSms(message1);
     Toast.show("Location sent successfully!!!", context, duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM); //When displaying, here it shows [Instance of 'Placemark']
   }
 
@@ -144,7 +174,23 @@ class _MyHomePageState extends State<MyHomePage> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                   splashColor: Colors.redAccent,
                   child: Text("SOS",style: TextStyle(color: Colors.white),),
-                  onPressed: initGps,
+                  onPressed: sos,
+                ),
+                Padding(padding: EdgeInsets.only(top: 20),),
+                MaterialButton(
+                  color: Colors.white,
+                  minWidth: 100.0,
+                  height: 50.0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  splashColor: Colors.white70,
+                  child: Text("Check Status",style: TextStyle(color: Colors.redAccent),),
+                  onPressed: () {
+                    initGps();
+                    Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => unsafearea()
+                      ),
+                    );
+                  },
                 )
               ],
             ),
@@ -209,7 +255,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   prefs.remove('password');
                   prefs.remove('name');
                   Navigator.of(context).pop();
-                  FirebaseAuth.instance.signOut();
                   Future.delayed(const Duration(milliseconds: 500), () {
                     exit(1);
                   });
