@@ -13,8 +13,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hardware_buttons/hardware_buttons.dart' as HardwareButtons;
 import 'main.dart';
 import 'package:toast/toast.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 final db=Firestore.instance;
+
 String name;
 
 // ignore: camel_case_types
@@ -28,7 +29,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   GpsLatlng latlng;
   List<Placemark> placemark;
-  String address,link;
+  String address;
   String temp1="",temp2="",ec1,ec2;
   StreamSubscription<HardwareButtons.VolumeButtonEvent> _lockButtonSubscription;
 
@@ -45,14 +46,8 @@ class _MyHomePageState extends State<MyHomePage> {
     _lockButtonSubscription = HardwareButtons.volumeButtonEvents.listen((event) {
       test=event.toString();
       if(test=="VolumeButtonEvent.VOLUME_UP")
-        sos();
+        initGps();
     });
-
-  }
-
-  void checkstatus()
-  {
-    initGps();
 
   }
 
@@ -62,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if(enabled==false)
       enabled = await location.requestService();
     if(enabled==true) {
-      final  gps = await Gps.currentGps();
+      final gps = await Gps.currentGps();
       latlng = gps;
       String temp = latlng.toString();
       double lat = 0.0,
@@ -84,43 +79,26 @@ class _MyHomePageState extends State<MyHomePage> {
       lat = double.parse(temp1);
       long = double.parse(temp2);
       placemark = await Geolocator().placemarkFromCoordinates(lat, long);
-      address = "I am in emergency!\nThis is my current location: "+placemark[0].name + ", " + placemark[0].subLocality + ", " +
+      address = placemark[0].name + ", " + placemark[0].subLocality + ", " +
           placemark[0].locality + ", " + placemark[0].administrativeArea +
-          ", " + placemark[0].country + " - " + placemark[0].postalCode+"\nCoordinates: "+temp1+","+temp2;
-      link="Google Map Link: http://maps.google.com/maps?z=18&q="+temp1+","+temp2;
+          ", " + placemark[0].country + " - " + placemark[0].postalCode;
       sms();
     }
     else
       initGps();
   }
-  void sos()
-  {
-    initGps();
-    sms();
-  }
   sms(){
     SmsSender sender = new SmsSender();
     String add = '+919913971152';
-    SmsMessage message = new SmsMessage(add, address);
+    SmsMessage message = new SmsMessage(add, 'I am in emergency!\nThis is my current location: '+address+'\nCoordinates(Latitude,Longitude):\n('+temp1+', '+temp2+')');
     message.onStateChanged.listen((state) {
       if (state == SmsMessageState.Sent) {
         print("SMS is sent!");
-      }
-      else if (state == SmsMessageState.Delivered) {
+      } else if (state == SmsMessageState.Delivered) {
         print("SMS is delivered!");
-      }
+      } else
+        print(state);
     });
-    sender.sendSms(message);
-    SmsMessage message1 = new SmsMessage(add, link);
-    message1.onStateChanged.listen((state) {
-      if (state == SmsMessageState.Sent) {
-        print("SMS is sent!");
-      }
-      else if (state == SmsMessageState.Delivered) {
-        print("SMS is delivered!");
-      }
-    });
-    print("Email:"+s);
     DocumentReference documentReference = db.collection("Users").document(s);
     documentReference.get().then((datasnapshot) {
       if (datasnapshot.exists) {
@@ -128,17 +106,11 @@ class _MyHomePageState extends State<MyHomePage> {
          ec2 = datasnapshot.data['Emergency Contact 2'].toString();
       }
     });
-    print("ec1="+ec1);
-    print("ec2="+ec2);
-    sender.sendSms(message1);
-    message = new SmsMessage(ec1, address);
     sender.sendSms(message);
-    message1 = new SmsMessage(ec1, link);
-    sender.sendSms(message1);
-    message = new SmsMessage(ec2, address);
+    /*message = new SmsMessage(ec1, 'I am in emergency!\nThis is my current location: '+address+'\nCoordinates(Latitude,Longitude):\n('+temp1+', '+temp2+')');
     sender.sendSms(message);
-    message1 = new SmsMessage(ec2, link);
-    sender.sendSms(message1);
+    message = new SmsMessage(ec2, 'I am in emergency!\nThis is my current location: '+address+'\nCoordinates(Latitude,Longitude):\n('+temp1+', '+temp2+')');
+    sender.sendSms(message);*/
     Toast.show("Location sent successfully!!!", context, duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM); //When displaying, here it shows [Instance of 'Placemark']
   }
 
@@ -237,6 +209,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   prefs.remove('password');
                   prefs.remove('name');
                   Navigator.of(context).pop();
+                  FirebaseAuth.instance.signOut();
                   Future.delayed(const Duration(milliseconds: 500), () {
                     exit(1);
                   });
