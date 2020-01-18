@@ -1,131 +1,337 @@
 import 'dart:async';
+import 'package:avatar_glow/avatar_glow.dart';
+import 'cnfusr.dart';
+import 'register.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:gps/gps.dart';
 import 'package:flutter/material.dart';
-import 'package:location/location.dart';
+import 'package:flutter/services.dart';
+import 'delayed_animation.dart';
+import 'home.dart';
 import 'package:toast/toast.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:sms/sms.dart';
-import 'package:hardware_buttons/hardware_buttons.dart' as HardwareButtons;
+import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
+bool ot,ot1;
+String s="";
 
-void main() => runApp(MyApp());
+void main() {
+  //SystemChrome.setEnabledSystemUIOverlays([]);
+  runApp(MyApp());
+}
 
-class MyApp extends StatelessWidget {
-
+class MyApp extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Suraksha',
+      home: Login(),
+      routes: <String, WidgetBuilder>{
+        '/homepage': (BuildContext context) => MyHomePage(),
+        '/loginpage': (BuildContext context) => MyApp(),
+      },
       theme: ThemeData(
-        primarySwatch: Colors.lightBlue,
+          primarySwatch: Colors.lightBlue,
+          accentColor: Colors.blueAccent
       ),
-      home: MyHomePage(title: 'Suraksha'),
     );
   }
 }
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
+class Login extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyAppState createState() => _MyAppState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  GpsLatlng latlng;
-  List<Placemark> placemark;
-  String address;
-  String temp1="",temp2="";
-  StreamSubscription<HardwareButtons.VolumeButtonEvent> _lockButtonSubscription;
+class _MyAppState extends State<Login> with SingleTickerProviderStateMixin {
+  final int delayedAmount = 500;
+  double _scale;
+  bool temp=false;
+
+  AnimationController _controller;
+  TextEditingController _email = TextEditingController();
+  TextEditingController _password = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String phoneNo;
+  String pass;
+  //FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<bool> credentials(String email, String password, String name) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('email', _email.text);
+    prefs.setString('password', _password.text);
+    prefs.setString('name', name);
+    return prefs.commit();
+  }
+
+  Future<bool> settemp(bool temp) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('temp', true);
+  }
+
+  Future<bool> gettemp() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    temp = prefs.getBool('temp');
+    return temp;
+  }
+
+  Future<void> getCredentials() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    s=prefs.getString("email");
+    pass=prefs.getString("password");
+    name=prefs.getString("name");
+  }
+
+  /*Future<String> getPass() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    pass=prefs.getString("password");
+    return pass;
+  }*/
+
+  void change() async {
+    s = _email.text;
+    if (_formKey.currentState.validate()) {
+      DocumentReference documentReference = db.collection("Users").document(s);
+      documentReference.get().then((datasnapshot) async {
+        if (datasnapshot.exists) {
+          pass = datasnapshot.data['Password'].toString();
+          if (_password.text == pass) {
+            name =datasnapshot.data['Name'].toString();
+            settemp(true);
+            credentials(s, pass, name).then((bool comitted) {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushReplacementNamed('/homepage');
+            });
+          }
+          else
+            Toast.show("Invalid Password!!!", context, duration: Toast.LENGTH_LONG, gravity: Toast.TOP);
+        }
+        else
+          Toast.show("User not registered!!!", context, duration: Toast.LENGTH_LONG, gravity: Toast.TOP);
+      }
+      );
+    }
+  }
 
   @override
   void initState() {
-    String test="";
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+      lowerBound: 0.0,
+      upperBound: 0.1,
+    )..addListener(() {
+      setState(() {});
+    });
+    ot = true;
+    ot1 = true;
+    _email.text=null;
+    _password.text=null;
+    gettemp().whenComplete(() {
+      setState(() {
+        this.temp = temp;
+      });
+      if(temp == true) {
+        getCredentials().whenComplete(updatePage);
+      }
+    });
     super.initState();
-    _lockButtonSubscription = HardwareButtons.volumeButtonEvents.listen((event) {
-      test=event.toString();
-      if(test=="VolumeButtonEvent.VOLUME_UP")
-        initGps();
-    });
-
   }
-
-  void initGps() async {
-    var location = Location();
-    bool enabled = await location.serviceEnabled();
-    if(enabled==false)
-      enabled = await location.requestService();
-    if(enabled==true) {
-      var gps = await Gps.currentGps();
-      latlng = gps;
-      String temp = latlng.toString();
-      double lat = 0.0,
-          long = 0.0;
-      int i = 0;
-      temp1 = "";
-      temp2 = "";
-      while (temp[i] != ',') {
-        temp1 += temp[i];
-        i++;
-      }
-      i += 2;
-      while (i != temp.length) {
-        temp2 += temp[i];
-        i++;
-      }
-      print(temp1);
-      print(temp2);
-      lat = double.parse(temp1);
-      long = double.parse(temp2);
-      placemark = await Geolocator().placemarkFromCoordinates(lat, long);
-      address = placemark[0].name + ", " + placemark[0].subLocality + ", " +
-          placemark[0].locality + ", " + placemark[0].administrativeArea +
-          ", " + placemark[0].country + " - " + placemark[0].postalCode;
-      sms();
-    }
-    else
-      initGps();
+  void updatePage(){
+    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacementNamed('/homepage');
   }
-  sms(){
-    SmsSender sender = new SmsSender();
-    String add = '+917818044311';
-    SmsMessage message = new SmsMessage(add, 'I am in emergency!\nThis is my current location: '+address+'\nLatitude: '+temp1+'\nLongitude: '+temp2);
-    message.onStateChanged.listen((state) {
-      if (state == SmsMessageState.Sent) {
-        print("SMS is sent!");
-      } else if (state == SmsMessageState.Delivered) {
-        print("SMS is delivered!");
-      }
-    });
-    sender.sendSms(message);
-    Toast.show("Location sent successfully!!!", context, duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM); //When displaying, here it shows [Instance of 'Placemark']
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Suraksha"),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    final color = Colors.white;
+    _scale = 1 - _controller.value;
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          fit: StackFit.expand,
           children: <Widget>[
-            MaterialButton(
-                color: Colors.red,
-                minWidth: 100.0,
-                height: 50.0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                splashColor: Colors.redAccent,
-                child: Text("SOS",style: TextStyle(color: Colors.white),),
-                onPressed: initGps,
-            )
+            Image(
+              image: AssetImage("assets/img.jpg"),
+              fit: BoxFit.cover,
+              color: Colors.black54,
+              colorBlendMode: BlendMode.darken,
+            ),
+            Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+              child: Form(key: _formKey,
+                child: Theme(
+                  data: ThemeData(
+                    brightness: Brightness.dark,
+                    accentColor: Colors.lightBlue,
+                    primaryColor: Colors.blueAccent,
+                    inputDecorationTheme: InputDecorationTheme(
+                      labelStyle: TextStyle(color: color, fontSize: 20.0),
+                    ),
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      AvatarGlow(
+                        endRadius: 90,
+                        duration: Duration(seconds: 2),
+                        glowColor: color,
+                        repeat: true,
+                        repeatPauseDuration: Duration(seconds: 2),
+                        startDelay: Duration(seconds: 1),
+                        child: Material(
+                          elevation: 8.0,
+                          shape: CircleBorder(),
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Image.asset("assets/complaint.png"),
+                            radius: 50.0,
+                          ),
+                        ),
+                      ),
+                      DelayedAimation(
+                        child: Text("Welcome", style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 35.0,
+                            color: color),
+                        ),
+                        delay: delayedAmount + 500,
+                      ),
+                      SizedBox(height: 30.0),
+                      DelayedAimation(
+                        child: TextFormField(
+                          autofocus: false,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(prefixIcon: Icon(Icons.email),hintText: 'Email Id',
+                            contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+                          ),
+                          validator: (value){
+                            if(value.isEmpty)
+                              return 'Please enter Email Address';
+                            return null;
+                          },
+                          controller: _email,
+                        ),
+                        delay: delayedAmount + 1000,
+                      ),
+                      SizedBox(height: 15.0),
+                      DelayedAimation(
+                        child: TextFormField(
+                          autofocus: false,
+                          obscureText: ot,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(prefixIcon: Icon(Icons.lock),hintText: 'Password',
+                            contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+                            suffixIcon: GestureDetector(
+                              onTap: () { setState(() {ot = !ot;}); },
+                              child: Icon(ot ? Icons.visibility : Icons.visibility_off,
+                                semanticLabel: ot ? 'show password' : 'hide password',
+                              ),
+                            ),
+                          ),
+                          validator: (value){
+                            if(value.isEmpty)
+                              return 'Please enter Password';
+                            return null;
+                          },
+                          controller: _password,
+                        ),
+                        delay: delayedAmount + 1500,
+                      ),
+                      SizedBox(height: 50.0),
+                      DelayedAimation(
+                        child: GestureDetector(
+                          onTapDown: _onTapDown,
+                          onTapUp: _onTapUp,
+                          child: Transform.scale(
+                            scale: _scale,
+                            child: _animatedButtonUI,
+                          ),
+                        ),
+                        delay: delayedAmount + 2000,
+                      ),
+                      SizedBox(height: 30.0,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          DelayedAimation(
+                            child: FlatButton(
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              onPressed: () async { Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) => cnfusr()));
+                              },
+                              child: Text('Forgot Password', style: TextStyle(color: Colors.white70)),
+                            ),
+                            delay: delayedAmount + 2500,
+                          ),
+                          DelayedAimation(
+                            child: Text("|"),
+                            delay: delayedAmount + 2500,
+                          ),
+                          DelayedAimation(
+                            child: FlatButton(
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              onPressed: () async { Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) => register()));
+                              },
+                              child: Text('Register Now', style: TextStyle(color: Colors.white70)),
+                            ),
+                            delay: delayedAmount + 2500,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
-      // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Widget get _animatedButtonUI => Container(
+    height: 60,
+    width: 200,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(100.0),
+      /*gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.blueAccent,
+          Colors.pinkAccent,
+        ],
+      )*/
+      color: Colors.white,
+    ),
+    child: Center(
+      child: /*MaterialButton(
+        //materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        onPressed: () async { launch('https://bits-grievance-1c10f.firebaseapp.com/resetPassword.html'); },
+        child: Text('Log In', style: TextStyle(color: Colors.blueAccent)),
+      ),*/
+      Text(
+        'Log In',
+        style: TextStyle(
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
+          color: Colors.blueAccent,
+        ),
+      ),
+    ),
+  );
+
+  void _onTapDown(TapDownDetails details) async {
+    _controller.forward();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      change();
+    });
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    _controller.reverse();
   }
 }
