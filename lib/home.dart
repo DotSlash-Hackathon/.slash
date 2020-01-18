@@ -88,6 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
           placemark[0].locality + ", " + placemark[0].administrativeArea +
           ", " + placemark[0].country + " - " + placemark[0].postalCode+"\nCoordinates: "+temp1+","+temp2;
       link="Google Map Link: http://maps.google.com/maps?z=18&q="+temp1+","+temp2;
+      sms();
     }
     else
       initGps();
@@ -119,6 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
         print("SMS is delivered!");
       }
     });
+    print("Email:"+s);
     DocumentReference documentReference = db.collection("Users").document(s);
     documentReference.get().then((datasnapshot) {
       if (datasnapshot.exists) {
@@ -126,6 +128,8 @@ class _MyHomePageState extends State<MyHomePage> {
          ec2 = datasnapshot.data['Emergency Contact 2'].toString();
       }
     });
+    print("ec1="+ec1);
+    print("ec2="+ec2);
     sender.sendSms(message1);
     message = new SmsMessage(ec1, address);
     sender.sendSms(message);
@@ -168,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                   splashColor: Colors.redAccent,
                   child: Text("SOS",style: TextStyle(color: Colors.white),),
-                  onPressed: sos,
+                  onPressed: initGps,
                 )
               ],
             ),
