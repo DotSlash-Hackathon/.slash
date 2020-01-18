@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "817107110176",
+    "firebase_url": "https://suraksha-4228a.firebaseio.com",
+    "project_id": "suraksha-4228a",
+    "storage_bucket": "suraksha-4228a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:817107110176:android:386a3c29a74ef398532f45",
+        "android_client_info": {
+          "package_name": "devnet.suraksha"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "817107110176-kk9m11nmhso9p0gk9rh3hkfr9pjfiifg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "devnet.suraksha",
+            "certificate_hash": "6f276fbab0ad2a5445dd14a9f7f4aa8077bdd89b"
+          }
+        },
+        {
+          "client_id": "817107110176-1r8jbll4atahhgtq9j5686bdcc98i56t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "devnet.suraksha",
+            "certificate_hash": "6d120ce170d4b9f955f7d48bc4928ad15dc6a9c9"
+          }
+        },
+        {
+          "client_id": "817107110176-nb3v83s600fu17fn1l6gt5tjnk07sjcl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCL7u28bYadIYYTC51Eha6ZpODRmWfkbyU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "817107110176-nb3v83s600fu17fn1l6gt5tjnk07sjcl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
