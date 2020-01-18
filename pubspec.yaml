@@ -26,10 +26,10 @@ dependencies:
   avatar_glow:
   toast: ^0.1.5
   url_launcher: ^5.4.1
-  firebase_auth: ^0.15.3
-  firebase_core: ^0.4.3
-  firebase_analytics: ^5.0.9
-  cloud_firestore: ^0.13.0
+  firebase_auth: ^0.15.2
+  firebase_core: ^0.4.0
+  firebase_analytics: ^5.0.6
+  cloud_firestore: ^0.12.10
   gps: ^0.1.1
   geolocator: ^5.2.0
   google_maps_flutter: ^0.5.21
