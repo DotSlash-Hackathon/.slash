@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:suraksha/updateDetails.dart';
 import 'cnfusr.dart';
 import 'package:gps/gps.dart';
 import 'package:location/location.dart';
@@ -12,10 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hardware_buttons/hardware_buttons.dart' as HardwareButtons;
 import 'main.dart';
 import 'package:toast/toast.dart';
-//import 'history.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-final db=Firestore.instance;
 
+final db=Firestore.instance;
 String name;
 
 // ignore: camel_case_types
@@ -46,8 +45,14 @@ class _MyHomePageState extends State<MyHomePage> {
     _lockButtonSubscription = HardwareButtons.volumeButtonEvents.listen((event) {
       test=event.toString();
       if(test=="VolumeButtonEvent.VOLUME_UP")
-        initGps();
+        sos();
     });
+
+  }
+
+  void checkstatus()
+  {
+    initGps();
 
   }
 
@@ -83,10 +88,14 @@ class _MyHomePageState extends State<MyHomePage> {
           placemark[0].locality + ", " + placemark[0].administrativeArea +
           ", " + placemark[0].country + " - " + placemark[0].postalCode+"\nCoordinates: "+temp1+","+temp2;
       link="Google Map Link: http://maps.google.com/maps?z=18&q="+temp1+","+temp2;
-      sms();
     }
     else
       initGps();
+  }
+  void sos()
+  {
+    initGps();
+    sms();
   }
   sms(){
     SmsSender sender = new SmsSender();
@@ -159,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                   splashColor: Colors.redAccent,
                   child: Text("SOS",style: TextStyle(color: Colors.white),),
-                  onPressed: initGps,
+                  onPressed: sos,
                 )
               ],
             ),
@@ -193,15 +202,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
               ListTile(
-                title: Text('History'),
-                leading: Icon(Icons.history,color: Colors.orange,),
-                /*onTap: () {
+                title: Text('Change Emergency Contacts'),
+                leading: Icon(Icons.contacts,color: Colors.orange,),
+                onTap: () {
                   Navigator.pop(context);
                   Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => display()
+                    MaterialPageRoute(builder: (context) => updateDetails()
                     ),
                   );
-                },*/
+                },
               ),
               ListTile(
                 title: Text('Change Password'),
