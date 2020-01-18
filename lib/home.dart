@@ -99,8 +99,6 @@ class _MyHomePageState extends State<MyHomePage> {
       else if (state == SmsMessageState.Delivered) {
         print("SMS is delivered!");
       }
-      else
-        sms();
     });
     sender.sendSms(message);
     SmsMessage message1 = new SmsMessage(add, link);
@@ -111,8 +109,6 @@ class _MyHomePageState extends State<MyHomePage> {
       else if (state == SmsMessageState.Delivered) {
         print("SMS is delivered!");
       }
-      else
-        sms();
     });
     DocumentReference documentReference = db.collection("Users").document(s);
     documentReference.get().then((datasnapshot) {
@@ -122,10 +118,14 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
     sender.sendSms(message1);
-    /*message = new SmsMessage(ec1, 'I am in emergency!\nThis is my current location: '+address+'\nLatitude: '+temp1+'\nLongitude: '+temp2);
+    message = new SmsMessage(ec1, address);
     sender.sendSms(message);
-    message = new SmsMessage(ec2, 'I am in emergency!\nThis is my current location: '+address+'\nLatitude: '+temp1+'\nLongitude: '+temp2);
-    sender.sendSms(message);*/
+    message1 = new SmsMessage(ec1, link);
+    sender.sendSms(message1);
+    message = new SmsMessage(ec2, address);
+    sender.sendSms(message);
+    message1 = new SmsMessage(ec2, link);
+    sender.sendSms(message1);
     Toast.show("Location sent successfully!!!", context, duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM); //When displaying, here it shows [Instance of 'Placemark']
   }
 
