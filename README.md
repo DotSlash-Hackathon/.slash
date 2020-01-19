@@ -8,8 +8,8 @@ Whenever any girl is in danger, they can use the app.
 
 **Major features of Suraksha are:**
 <ol>
-         <li>The app can be invoked using **Google Assistant**.</li>
-         <li>Once the app is opened, the user can simply press the **Volume Up** button to send the current location.</li>
+         <li>The app can be invoked using <b>Google Assistant.</b></li>
+         <li>Once the app is opened, the user can simply press the <b>Volume Up Button</b> to send the current location.</li>
          <li>The location will be sent as SMS to the 2 registered number which is taken during registration.</li>
          <li>The message is in 3 form: 
                   <ul>
