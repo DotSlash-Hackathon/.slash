@@ -49,11 +49,12 @@ class unsafearea extends StatelessWidget {
       };
       await db.collection(s).document(loc).setData(data).whenComplete(() {
         print("Location Added");
-      }).catchError((e) => print(e));
+      }).catchError((e) => print(e));        
       return "Hello";
     }
-    else
+    else{
       return null;
+    }
   }
 
   @override
@@ -76,7 +77,7 @@ class unsafearea extends StatelessWidget {
                 switch (snapshot.connectionState) {
                   case ConnectionState.waiting:
                     return Text('Retrieving Locations...',
-                      style: TextStyle(fontSize: 20),);
+                      style: TextStyle(fontSize: 20),);                
                   default:
                     return new ListView(
                       children: snapshot.data.documents.map((

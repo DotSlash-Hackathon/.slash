@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:suraksha/loc.dart';
 import 'package:suraksha/unsafeareas.dart';
 import 'package:suraksha/updateDetails.dart';
 import 'cnfusr.dart';
@@ -23,6 +24,7 @@ List<Placemark> placemark;
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -32,6 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String address, link;
   String temp1="",temp2="",ec1,ec2,l1,l2;
+  String gatsby;
 
   StreamSubscription<HardwareButtons.VolumeButtonEvent> _lockButtonSubscription;
 
@@ -82,9 +85,10 @@ class _MyHomePageState extends State<MyHomePage> {
       lat = double.parse(temp1);
       long = double.parse(temp2);
       placemark = await Geolocator().placemarkFromCoordinates(lat, long);
-      address = "I am in emergency!\nThis is my current location: "+placemark[0].name + ", " + placemark[0].subLocality + ", " +
+      gatsby = placemark[0].name + ", " + placemark[0].subLocality + ", " +
           placemark[0].locality + ", " + placemark[0].administrativeArea +
-          ", " + placemark[0].country + " - " + placemark[0].postalCode+"\nCoordinates: "+temp1+","+temp2;
+          ", " + placemark[0].country + " - " + placemark[0].postalCode;
+      address = "I am in emergency!\nThis is my current location: "+gatsby+"\nCoordinates: "+temp1+","+temp2;
       link="Google Map Link: http://maps.google.com/maps?z=18&q="+temp1+","+temp2;
     }
     else
@@ -137,8 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
     sender.sendSms(message1);
     Toast.show("Location sent successfully!!!", context, duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM); //When displaying, here it shows [Instance of 'Placemark']
     Map<String,dynamic> data = <String,dynamic>{
-        "Latitude": temp1,
-        "Longitude": temp2,
+        "Address": gatsby,
       };
       await db.collection("Unsafe").document(temp1+","+temp2).setData(data).whenComplete(() {
         print("Location Added");
@@ -189,9 +192,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: () {
                     initGps();
                     Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => unsafearea()
-                      ),
+                      MaterialPageRoute(builder: (context) => display()
+                      ),                    
                     );
+                    //Navigator.of(context).pushReplacementNamed('/display');
+                    //display();
                   },
                 )
               ],

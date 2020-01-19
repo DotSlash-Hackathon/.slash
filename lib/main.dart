@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:avatar_glow/avatar_glow.dart';
+import 'package:suraksha/loc.dart';
 import 'cnfusr.dart';
 import 'register.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'delayed_animation.dart';
 import 'home.dart';
+import 'loc.dart';
 import 'package:toast/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:firebase_auth/firebase_auth.dart';
@@ -29,6 +31,7 @@ class MyApp extends StatelessWidget{
       routes: <String, WidgetBuilder>{
         '/homepage': (BuildContext context) => MyHomePage(),
         '/loginpage': (BuildContext context) => MyApp(),
+        '/display': (BuildContext context) => display(),
       },
       theme: ThemeData(
           primarySwatch: Colors.lightBlue,
@@ -183,13 +186,13 @@ class _MyAppState extends State<Login> with SingleTickerProviderStateMixin {
                           shape: CircleBorder(),
                           child: CircleAvatar(
                             backgroundColor: Colors.white,
-                            child: Image.asset("assets/logo.png"),
+                            child: Image.asset("assets/complaint.png"),
                             radius: 50.0,
                           ),
                         ),
                       ),
                       DelayedAimation(
-                        child: Text("Welcome", style: TextStyle(
+                        child: Text("Welcome to Suraksha", style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 35.0,
                             color: color),
