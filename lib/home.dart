@@ -48,7 +48,10 @@ class _MyHomePageState extends State<MyHomePage> {
     _lockButtonSubscription = HardwareButtons.volumeButtonEvents.listen((event) {
       test=event.toString();
       if(test=="VolumeButtonEvent.VOLUME_UP")
-        sos();
+        {
+          initGps();
+          sms();
+        }
     });
 
   }
@@ -90,18 +93,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void sos() async {
     initGps();
     sms();
-    Map<String,dynamic> data = <String,dynamic>{
-        "Latitude": temp1,
-        "Longitude": temp2,
-      };
-      await db.collection("Unsafe").add(data).whenComplete(() {
-        print("Location Added");
-      }).catchError((e) => print(e));
       //Toast.show("Location Submitted Successfuly", context, duration: Toast.LENGTH_LONG,gravity: Toast.BOTTOM);
   }
-  sms(){
+  sms() async {
     SmsSender sender = new SmsSender();
-    String add = '+919913971152';
+    String add = '+917818044311';
     SmsMessage message = new SmsMessage(add, address);
     message.onStateChanged.listen((state) {
       if (state == SmsMessageState.Sent) {
@@ -140,6 +136,14 @@ class _MyHomePageState extends State<MyHomePage> {
     message1 = new SmsMessage(ec2, link);
     sender.sendSms(message1);
     Toast.show("Location sent successfully!!!", context, duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM); //When displaying, here it shows [Instance of 'Placemark']
+    Map<String,dynamic> data = <String,dynamic>{
+        "Latitude": temp1,
+        "Longitude": temp2,
+      };
+      await db.collection("Unsafe").document(temp1+","+temp2).setData(data).whenComplete(() {
+        print("Location Added");
+      }).catchError((e) => print(e));
+    
   }
 
   Widget build(BuildContext context) {
