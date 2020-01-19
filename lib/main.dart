@@ -183,7 +183,7 @@ class _MyAppState extends State<Login> with SingleTickerProviderStateMixin {
                           shape: CircleBorder(),
                           child: CircleAvatar(
                             backgroundColor: Colors.white,
-                            child: Image.asset("assets/complaint.png"),
+                            child: Image.asset("assets/logo.png"),
                             radius: 50.0,
                           ),
                         ),

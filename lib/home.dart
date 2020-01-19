@@ -76,8 +76,6 @@ class _MyHomePageState extends State<MyHomePage> {
         temp2 += temp[i];
         i++;
       }
-      print(temp1);
-      print(temp2);
       lat = double.parse(temp1);
       long = double.parse(temp2);
       placemark = await Geolocator().placemarkFromCoordinates(lat, long);
@@ -209,7 +207,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   currentAccountPicture: Container(
                     decoration: BoxDecoration(shape: BoxShape.circle,
                       image: DecorationImage(fit: BoxFit.fill,
-                          image: AssetImage("assets/complaint.png")),
+                          image: AssetImage("assets/logo.png")),
                     ),
                   ),
                   accountEmail: null,
