@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:suraksha/loc.dart';
-import 'package:suraksha/unsafeareas.dart';
 import 'package:suraksha/updateDetails.dart';
 import 'cnfusr.dart';
 import 'package:gps/gps.dart';
@@ -161,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Stack(
         children: <Widget>[
           Image(
-            image: AssetImage("assets/img.jpg"),
+            image: AssetImage("assets/home.jpeg"),
             width: size.width,
             height: size.height,
             fit: BoxFit.fill,
@@ -212,11 +211,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: EdgeInsets.zero,
                 child: UserAccountsDrawerHeader(
                   decoration: BoxDecoration(color: Colors.lightBlue),
-                  accountName: Text("$name\n"+s,style: TextStyle(fontSize: 18.0),),
+                  accountName: Text("$name",style: TextStyle(fontSize: 18.0),),
                   currentAccountPicture: Container(
                     decoration: BoxDecoration(shape: BoxShape.circle,
                       image: DecorationImage(fit: BoxFit.fill,
-                          image: AssetImage("assets/logo.png")),
+                          image: AssetImage("assets/logo.jpeg")),
                     ),
                   ),
                   accountEmail: null,

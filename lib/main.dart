@@ -156,7 +156,7 @@ class _MyAppState extends State<Login> with SingleTickerProviderStateMixin {
           fit: StackFit.expand,
           children: <Widget>[
             Image(
-              image: AssetImage("assets/img.jpg"),
+              image: AssetImage("assets/main.jpeg"),
               fit: BoxFit.cover,
               color: Colors.black54,
               colorBlendMode: BlendMode.darken,
@@ -186,7 +186,7 @@ class _MyAppState extends State<Login> with SingleTickerProviderStateMixin {
                           shape: CircleBorder(),
                           child: CircleAvatar(
                             backgroundColor: Colors.white,
-                            child: Image.asset("assets/complaint.png"),
+                            child: Image.asset("assets/logo.jpeg"),
                             radius: 50.0,
                           ),
                         ),
