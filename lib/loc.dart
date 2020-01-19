@@ -28,7 +28,7 @@ class display extends StatelessWidget {
   Widget build(BuildContext context) {
       return Scaffold(
         appBar: new AppBar(
-          title: new Text("History", style: TextStyle(color: Colors.white)),
+          title: new Text("Unsafe Areas", style: TextStyle(color: Colors.white)),
           iconTheme: new IconThemeData(color: Colors.white),
         ),
         body: Center(

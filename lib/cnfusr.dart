@@ -197,7 +197,7 @@ class _cnfusrstate extends State<cnfusr> {
       body: Stack(
         children: <Widget>[
           Image(
-            image: AssetImage("assets/img.jpg"),
+            image: AssetImage("assets/main.jpeg"),
             width: size.width,
             height: size.height,
             fit: BoxFit.cover,

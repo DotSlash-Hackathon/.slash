@@ -64,7 +64,7 @@ class _forgetstate extends State<forget> {
       body: Stack(
         children: <Widget>[
           Image(
-            image: AssetImage("assets/img.jpg"),
+            image: AssetImage("assets/main.jpeg"),
             width: size.width,
             height: size.height,
             fit: BoxFit.cover,
