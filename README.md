@@ -21,4 +21,4 @@ Whenever any girl is in danger, they can use the app.
         <li>Along with checking for current location, the user will get information about every unsafe location in 10km radius.</li>
 </ol>
 
-We have built the same using Flutter as the front-end and back-end. For database, we have used Firebase. For sending sms, we have used sms library of flutter. For getting the user coordinates, we have used gps library of flutter and for reverse geocoding i.e., converting the coordinates into proper string format address, we have used geocoder package of flutter.
+We have built the same using Flutter as the Front-End and back-end. For database, we have used Firebase. For sending sms, we have used sms library of flutter. For getting the user coordinates, we have used gps library of flutter and for reverse geocoding i.e., converting the coordinates into proper string format address, we have used geocoder package of flutter.
